@@ -1,10 +1,12 @@
 """ Simple payment engine.
 
+Writing to stdout
 Example::
-python payment_engine <NAME>.csv
+python payment_engine.py <NAME>.csv
 
+Writing to file
 Example::
-python payment_engine <NAME>.csv > <NAME>.csv
+python payment_engine.py <NAME>.csv > <NAME>.csv
 
 """
 import logging
