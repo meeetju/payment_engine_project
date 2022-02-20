@@ -1,5 +1,5 @@
 from mock import patch, mock_open
-from pytest import main
+from pytest import main, raises
 from io import StringIO
 
 from source.payment_engine import CsvTransactionsReader, PaymentsEngine, Reporter
@@ -213,6 +213,42 @@ class TestTransactions:
                    '4,10.1234,0.0,10.1234,false\n'
 
         assert captured == expected
+
+    def test_incorrect_data_type_handling_for_amount(self, capsys):
+
+        with raises(ValueError):
+
+            with patch('builtins.open', new_callable=mock_open) as open_mock:
+                open_mock.return_value = StringIO("type,client,tx,amount\n"
+                                                  "deposit,1,100,LOL")
+
+                bank = PaymentsEngine(CsvTransactionsReader('dummy'), Reporter())
+                bank.run()
+                captured, _ = capsys.readouterr()
+
+    def test_incorrect_data_type_handling_for_transaction_id(self, capsys):
+
+        with raises(ValueError):
+
+            with patch('builtins.open', new_callable=mock_open) as open_mock:
+                open_mock.return_value = StringIO("type,client,tx,amount\n"
+                                                  "deposit,1,LOL,10.0")
+
+                bank = PaymentsEngine(CsvTransactionsReader('dummy'), Reporter())
+                bank.run()
+                captured, _ = capsys.readouterr()
+
+    def test_incorrect_data_type_handling_for_client_id(self, capsys):
+
+        with raises(ValueError):
+
+            with patch('builtins.open', new_callable=mock_open) as open_mock:
+                open_mock.return_value = StringIO("type,client,tx,amount\n"
+                                                  "deposit,LOL,100,10.0")
+
+                bank = PaymentsEngine(CsvTransactionsReader('dummy'), Reporter())
+                bank.run()
+                captured, _ = capsys.readouterr()
 
 
 if __name__ == '__main__':
