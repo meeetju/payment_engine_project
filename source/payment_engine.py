@@ -275,7 +275,9 @@ class PaymentsEngine:
         return transaction_id not in self._deposits_withdrawals
 
     def _is_transaction_disputable(self, transaction):
-        return transaction.id in self._deposits_withdrawals and not self._is_under_dispute(transaction)
+        return transaction.id in self._deposits_withdrawals and \
+               self._deposits_withdrawals[transaction.id].type == TransactionType.DEPOSIT and not \
+               self._is_under_dispute(transaction)
 
     def _is_client_correct(self, transaction):
         return transaction.client_id == self._deposits_withdrawals[transaction.id].client_id

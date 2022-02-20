@@ -62,6 +62,23 @@ class TestTransactions:
 
         assert captured == expected
 
+    def test_dispute_not_possible_on_withdraw(self, capsys):
+
+        with patch('builtins.open', new_callable=mock_open) as open_mock:
+            open_mock.return_value = StringIO("type,client,tx,amount\n"
+                                              "deposit,1,100,20.0\n"
+                                              "withdrawal,1,101,10.0\n"
+                                              "dispute,1,101,")  # Should be rejected, Client 1 should have 10.0 available and total
+
+            bank = PaymentsEngine(CsvTransactionsReader('dummy'), Reporter())
+            bank.run()
+            captured, _ = capsys.readouterr()
+
+        expected = 'client,available,held,total,locked\n' \
+                   '1,10.0,0.0,10.0,false\n'
+
+        assert captured == expected
+
     def test_dispute_fails_if_wrong_transaction_id(self, capsys):
 
         with patch('builtins.open', new_callable=mock_open) as open_mock:
